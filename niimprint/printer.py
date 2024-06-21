@@ -88,10 +88,10 @@ class SerialTransport(BaseTransport):
             raise RuntimeError(msg)
         return all_ports[0][0]
 
-    def read(self, length: int) -> bytes:
+    def read(self, length:int) -> bytes:
         return self._serial.read(length)
 
-    def write(self, data: bytes):
+    def write(self, data:bytes):
         return self._serial.write(data)
 
 
