@@ -45,41 +45,77 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-    - name: Download Artifacts
+    - name: Download Artifacts for Ubuntu x64
       uses: actions/download-artifact@v3
       with:
         name: niimprint-ubuntu-latest-x64
         path: ./release/ubuntu-latest-x64
 
-    - name: Download Artifacts
+    - name: Download Artifacts for Ubuntu aarch64
       uses: actions/download-artifact@v3
       with:
         name: niimprint-ubuntu-latest-aarch64
         path: ./release/ubuntu-latest-aarch64
 
-    - name: Download Artifacts
+    - name: Download Artifacts for Windows x64
       uses: actions/download-artifact@v3
       with:
         name: niimprint-windows-latest-x64
         path: ./release/windows-latest-x64
 
-    - name: Download Artifacts
+    - name: Download Artifacts for Windows aarch64
       uses: actions/download-artifact@v3
       with:
         name: niimprint-windows-latest-aarch64
         path: ./release/windows-latest-aarch64
 
     - name: Create Release
+      id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
+        tag_name: ${{ github.sha }}
+        release_name: Release ${{ github.sha }}
         draft: false
         prerelease: false
-        files: |
-          ./release/ubuntu-latest-x64/niimprint-ubuntu-latest-x64
-          ./release/ubuntu-latest-aarch64/niimprint-ubuntu-latest-aarch64
-          ./release/windows-latest-x64/niimprint-windows-latest-x64.exe
-          ./release/windows-latest-aarch64/niimprint-windows-latest-aarch64.exe
+
+    - name: Upload Release Asset Ubuntu x64
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./release/ubuntu-latest-x64/niimprint-ubuntu-latest-x64
+        asset_name: niimprint-ubuntu-latest-x64
+        asset_content_type: application/octet-stream
+
+    - name: Upload Release Asset Ubuntu aarch64
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./release/ubuntu-latest-aarch64/niimprint-ubuntu-latest-aarch64
+        asset_name: niimprint-ubuntu-latest-aarch64
+        asset_content_type: application/octet-stream
+
+    - name: Upload Release Asset Windows x64
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./release/windows-latest-x64/niimprint-windows-latest-x64.exe
+        asset_name: niimprint-windows-latest-x64.exe
+        asset_content_type: application/octet-stream
+
+    - name: Upload Release Asset Windows aarch64
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./release/windows-latest-aarch64/niimprint-windows-latest-aarch64.exe
+        asset_name: niimprint-windows-latest-aarch64.exe
+        asset_content_type: application/octet-stream
