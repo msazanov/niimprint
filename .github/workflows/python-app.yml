@@ -45,11 +45,15 @@ jobs:
         ls -la dist/
         if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
           if [ -f "dist/niimprint-${{ matrix.os }}-${{ matrix.arch }}.exe" ]; then
-            mv dist/niimprint-${{ matrix.os }}-${{ matrix.arch }}.exe dist/niimprint-${{ matrix.os }}-${{ matrix.arch }}.exe
+            mv dist/niimprint-${{ matrix.os }}-${{ matrix.arch }}.exe dist/niimprint-windows-latest-${{ matrix.arch }}.exe
           fi
         else
           if [ -f "dist/niimprint-${{ matrix.os }}-${{ matrix.arch }}" ]; then
-            mv dist/niimprint-${{ matrix.os }}-${{ matrix.arch }} dist/niimprint-${{ matrix.os }}-${{ matrix.arch }}
+            src="dist/niimprint-${{ matrix.os }}-${{ matrix.arch }}"
+            dest="dist/niimprint-${{ matrix.os }}-${{ matrix.arch }}"
+            if [ "$src" != "$dest" ]; then
+              mv "$src" "$dest"
+            fi
           fi
         fi
 
