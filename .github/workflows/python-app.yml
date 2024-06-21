@@ -33,19 +33,24 @@ jobs:
 
     - name: Build with PyInstaller
       run: |
-        if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+        if ($env:RUNNER_OS -eq 'Windows') {
           pyinstaller --onefile niimprint/__main__.py --name niimprint-${{ matrix.os }}-${{ matrix.arch }}.exe
-        else
+        } else {
           pyinstaller --onefile niimprint/__main__.py --name niimprint-${{ matrix.os }}-${{ matrix.arch }}
-        fi
+        }
+      shell: pwsh
 
-    - name: Check if file exists
+    - name: Check if file exists and rename if necessary
       run: |
         ls -la dist/
         if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-          mv dist/niimprint-${{ matrix.os }}-${{ matrix.arch }}.exe dist/niimprint-windows-latest-${{ matrix.arch }}.exe
+          if [ -f "dist/niimprint-${{ matrix.os }}-${{ matrix.arch }}.exe" ]; then
+            mv dist/niimprint-${{ matrix.os }}-${{ matrix.arch }}.exe dist/niimprint-${{ matrix.os }}-${{ matrix.arch }}.exe
+          fi
         else
-          mv dist/niimprint-${{ matrix.os }}-${{ matrix.arch }} dist/niimprint-${{ matrix.os }}-${{ matrix.arch }}
+          if [ -f "dist/niimprint-${{ matrix.os }}-${{ matrix.arch }}" ]; then
+            mv dist/niimprint-${{ matrix.os }}-${{ matrix.arch }} dist/niimprint-${{ matrix.os }}-${{ matrix.arch }}
+          fi
         fi
 
     - name: Upload artifact
@@ -80,4 +85,46 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: niimprint-windows-latest-aarch64
-        path: ./release/
+        path: ./release/windows-latest-aarch64
+
+    - name: Create Release
+      uses: actions/create-release@v1
+      with:
+        tag_name: v1.0.6
+        release_name: Release v1.0.6
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload Release Asset Ubuntu x64
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./release/ubuntu-latest-x64/niimprint-ubuntu-latest-x64
+        asset_name: niimprint-ubuntu-latest-x64
+        asset_content_type: application/octet-stream
+
+    - name: Upload Release Asset Ubuntu aarch64
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./release/ubuntu-latest-aarch64/niimprint-ubuntu-latest-aarch64
+        asset_name: niimprint-ubuntu-latest-aarch64
+        asset_content_type: application/octet-stream
+
+    - name: Upload Release Asset Windows x64
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./release/windows-latest-x64/niimprint-windows-latest-x64.exe
+        asset_name: niimprint-windows-latest-x64.exe
+        asset_content_type: application/octet-stream
+
+    - name: Upload Release Asset Windows aarch64
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./release/windows-latest-aarch64/niimprint-windows-latest-aarch64.exe
+        asset_name: niimprint-windows-latest-aarch64.exe
+        asset_content_type: application/octet-stream
