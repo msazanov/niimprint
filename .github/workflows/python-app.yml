@@ -33,17 +33,17 @@ jobs:
 
     - name: Build with PyInstaller
       run: |
-        if ($env:RUNNER_OS -eq 'Windows') {
+        if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
           pyinstaller --onefile niimprint/__main__.py --name niimprint-${{ matrix.os }}-${{ matrix.arch }}.exe
-        } else {
+        else
           pyinstaller --onefile niimprint/__main__.py --name niimprint-${{ matrix.os }}-${{ matrix.arch }}
-        }
-      shell: pwsh
+        fi
+      shell: bash
 
     - name: Check if file exists and rename if necessary
       run: |
         ls -la dist/
-        if [ "${{ matrix.os }}" = "windows-latest" ]; then
+        if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
           if [ -f "dist/niimprint-${{ matrix.os }}-${{ matrix.arch }}.exe" ]; then
             mv dist/niimprint-${{ matrix.os }}-${{ matrix.arch }}.exe dist/niimprint-windows-latest-${{ matrix.arch }}.exe
           fi
