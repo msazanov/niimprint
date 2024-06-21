@@ -6,12 +6,15 @@ on:
   pull_request:
     branches: [ "main" ]
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, ubuntu-22.04]
+        os: [ubuntu-latest, windows-latest]
         arch: [x64, aarch64]
 
     steps:
@@ -30,13 +33,13 @@ jobs:
 
     - name: Build with PyInstaller
       run: |
-        pyinstaller --onefile niimprint/__main__.py --name niimprint
+        pyinstaller --onefile niimprint/__main__.py --name niimprint-${{ matrix.os }}-${{ matrix.arch }}
 
     - name: Upload artifact
       uses: actions/upload-artifact@v3
       with:
         name: niimprint-${{ matrix.os }}-${{ matrix.arch }}
-        path: dist/niimprint
+        path: dist/
 
   release:
     needs: build
@@ -45,8 +48,26 @@ jobs:
     - name: Download Artifacts
       uses: actions/download-artifact@v3
       with:
-        name: niimprint
-        path: ./release
+        name: niimprint-ubuntu-latest-x64
+        path: ./release/ubuntu-latest-x64
+
+    - name: Download Artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: niimprint-ubuntu-latest-aarch64
+        path: ./release/ubuntu-latest-aarch64
+
+    - name: Download Artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: niimprint-windows-latest-x64
+        path: ./release/windows-latest-x64
+
+    - name: Download Artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: niimprint-windows-latest-aarch64
+        path: ./release/windows-latest-aarch64
 
     - name: Create Release
       uses: actions/create-release@v1
@@ -57,4 +78,8 @@ jobs:
         release_name: Release ${{ github.ref }}
         draft: false
         prerelease: false
-        files: ./release/**
+        files: |
+          ./release/ubuntu-latest-x64/niimprint-ubuntu-latest-x64
+          ./release/ubuntu-latest-aarch64/niimprint-ubuntu-latest-aarch64
+          ./release/windows-latest-x64/niimprint-windows-latest-x64.exe
+          ./release/windows-latest-aarch64/niimprint-windows-latest-aarch64.exe
