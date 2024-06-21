@@ -43,19 +43,16 @@ jobs:
     - name: Check if file exists and rename if necessary
       run: |
         ls -la dist/
-        if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+        if [ "${{ matrix.os }}" = "windows-latest" ]; then
           if [ -f "dist/niimprint-${{ matrix.os }}-${{ matrix.arch }}.exe" ]; then
             mv dist/niimprint-${{ matrix.os }}-${{ matrix.arch }}.exe dist/niimprint-windows-latest-${{ matrix.arch }}.exe
           fi
         else
           if [ -f "dist/niimprint-${{ matrix.os }}-${{ matrix.arch }}" ]; then
-            src="dist/niimprint-${{ matrix.os }}-${{ matrix.arch }}"
-            dest="dist/niimprint-${{ matrix.os }}-${{ matrix.arch }}"
-            if [ "$src" != "$dest" ]; then
-              mv "$src" "$dest"
-            fi
+            mv dist/niimprint-${{ matrix.os }}-${{ matrix.arch }} dist/niimprint-${{ matrix.os }}-${{ matrix.arch }}
           fi
         fi
+      shell: bash
 
     - name: Upload artifact
       uses: actions/upload-artifact@v3
