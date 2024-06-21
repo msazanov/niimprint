@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
@@ -33,7 +33,20 @@ jobs:
 
     - name: Build with PyInstaller
       run: |
-        pyinstaller --onefile niimprint/__main__.py --name niimprint-${{ matrix.os }}-${{ matrix.arch }}
+        if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+          pyinstaller --onefile niimprint/__main__.py --name niimprint-${{ matrix.os }}-${{ matrix.arch }}.exe
+        else
+          pyinstaller --onefile niimprint/__main__.py --name niimprint-${{ matrix.os }}-${{ matrix.arch }}
+        fi
+
+    - name: Check if file exists
+      run: |
+        ls -la dist/
+        if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+          mv dist/niimprint-${{ matrix.os }}-${{ matrix.arch }}.exe dist/niimprint-windows-latest-${{ matrix.arch }}.exe
+        else
+          mv dist/niimprint-${{ matrix.os }}-${{ matrix.arch }} dist/niimprint-${{ matrix.os }}-${{ matrix.arch }}
+        fi
 
     - name: Upload artifact
       uses: actions/upload-artifact@v3
@@ -67,55 +80,4 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: niimprint-windows-latest-aarch64
-        path: ./release/windows-latest-aarch64
-
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: v1.0.${{ github.run_number }}
-        release_name: Release v1.0.${{ github.run_number }}
-        draft: false
-        prerelease: false
-
-    - name: Upload Release Asset Ubuntu x64
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./release/ubuntu-latest-x64/niimprint-ubuntu-latest-x64
-        asset_name: niimprint-ubuntu-latest-x64
-        asset_content_type: application/octet-stream
-
-    - name: Upload Release Asset Ubuntu aarch64
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./release/ubuntu-latest-aarch64/niimprint-ubuntu-latest-aarch64
-        asset_name: niimprint-ubuntu-latest-aarch64
-        asset_content_type: application/octet-stream
-
-    - name: Upload Release Asset Windows x64
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./release/windows-latest-x64/niimprint-windows-latest-x64.exe
-        asset_name: niimprint-windows-latest-x64.exe
-        asset_content_type: application/octet-stream
-
-    - name: Upload Release Asset Windows aarch64
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./release/windows-latest-aarch64/niimprint-windows-latest-aarch64.exe
-        asset_name: niimprint-windows-latest-aarch64.exe
-        asset_content_type: application/octet-stream
+        path: ./release/
